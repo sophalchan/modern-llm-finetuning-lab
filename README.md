@@ -7,17 +7,21 @@ Two **local GPU projects** for efficient fine-tuning on consumer hardware (16–
 | **1 — Speed Run** | Llama-3.1-8B-Instruct | **QLoRA + Unsloth** | Fast domain / format adaptation |
 | **2 — Preference Align** | Qwen2.5-1.5B/7B-Instruct | **ORPO + DoRA** | Single-step style & preference tuning |
 
-## Web UI (test your model)
+## Web UI (test your models)
 
-After training Project 2:
+After training:
 
 ```bash
 source .venv/bin/activate
 pip install gradio
-python app_ui.py
+python app_ui_project1.py   # Project 1 QLoRA → http://localhost:7861
+python app_ui.py            # Project 2 ORPO/DoRA → http://localhost:7860
 ```
 
-Open **http://localhost:7860** in your browser — chat with your ORPO/DoRA fine-tuned model.
+| UI | Port | Adapters folder |
+|----|------|-----------------|
+| Project 1 — QLoRA | **7861** | `lora_model_qwen/` |
+| Project 2 — ORPO/DoRA | **7860** | `orpo_qwen_final/` |
 
 ## Hardware requirements
 
@@ -63,9 +67,17 @@ python project1_unsloth_qlora/export_gguf.py   # Ollama / LM Studio
 
 ```bash
 python project2_orpo_dora/train_qwen_orpo.py --config project2_low_vram.yaml
-python project2_orpo_dora/infer_qwen_orpo.py --prompt "Give a safe incident response summary."
+python project2_orpo_dora/infer_qwen_orpo.py --prompt "What is ORPO fine-tuning?"
 python app_ui.py   # Web UI → http://localhost:7860
 python project2_orpo_dora/train_qwen_orpo.py --no-dora   # standard LoRA only
+```
+
+### Project 1 — Qwen + QLoRA (8 GB)
+
+```bash
+python project1_unsloth_qlora/train_qwen_qlora.py --config project1_low_vram.yaml
+python project1_unsloth_qlora/infer_qwen_qlora.py --prompt "Explain QLoRA briefly."
+python app_ui_project1.py   # Web UI → http://localhost:7861
 ```
 
 ## Layout
@@ -74,8 +86,9 @@ python project2_orpo_dora/train_qwen_orpo.py --no-dora   # standard LoRA only
 configs/                    YAML hyperparameters
 project1_unsloth_qlora/     Llama-3.1 + Unsloth QLoRA train/infer/export
 project2_orpo_dora/         Qwen + ORPO/DoRA train/infer
-app_ui.py                   Gradio web chat UI (port 7860)
-src/inference_engine.py     Shared model loader for CLI + UI
+app_ui.py                   Gradio Web UI — Project 2 (port 7860)
+app_ui_project1.py          Gradio Web UI — Project 1 (port 7861)
+src/inference_engine.py     Shared PEFT model loader for CLI + both UIs
 ```
 
 **Author:** Sophal Chan · [Portfolio](https://sophalchan.github.io/)

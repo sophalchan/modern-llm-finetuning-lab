@@ -1,4 +1,4 @@
-"""Shared ORPO/DoRA inference engine for CLI and Gradio UI."""
+"""Shared PEFT adapter inference engine for CLI and Gradio UI."""
 
 from __future__ import annotations
 
@@ -7,10 +7,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-_engine: "OrpoInferenceEngine | None" = None
+_engines: dict[str, "PeftInferenceEngine"] = {}
 
 
-class OrpoInferenceEngine:
+class PeftInferenceEngine:
     def __init__(self, adapter_dir: str | Path):
         from peft import PeftModel
         from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
@@ -23,14 +23,16 @@ class OrpoInferenceEngine:
             adapter_path = ROOT / adapter_dir
         if not (adapter_path / "adapter_config.json").exists():
             raise FileNotFoundError(
-                f"No trained adapters at {adapter_path}. "
-                "Run: python project2_orpo_dora/train_qwen_orpo.py --config project2_low_vram.yaml"
+                f"No trained adapters at {adapter_path}.\n"
+                "Project 1: python project1_unsloth_qlora/train_qwen_qlora.py --config project1_low_vram.yaml\n"
+                "Project 2: python project2_orpo_dora/train_qwen_orpo.py --config project2_low_vram.yaml"
             )
 
         cfg = json.loads((adapter_path / "adapter_config.json").read_text(encoding="utf-8"))
         self.base_id = cfg["base_model_name_or_path"]
         self.adapter_path = adapter_path
         self.use_dora = cfg.get("use_dora", False)
+        self._adapter_name = adapter_path.name
 
         token = hf_token()
         bnb = BitsAndBytesConfig(
@@ -65,22 +67,29 @@ class OrpoInferenceEngine:
                 pad_token_id=self.tokenizer.eos_token_id,
             )
         full = self.tokenizer.decode(out[0], skip_special_tokens=True)
-        # Return assistant portion only when possible
         if "assistant" in full.lower():
             parts = full.split("assistant")
             return parts[-1].strip() if len(parts) > 1 else full.strip()
         return full.strip()
 
     def info(self) -> dict:
+        name = self._adapter_name.lower()
+        if self.use_dora or "orpo" in name:
+            method = "ORPO + DoRA" if self.use_dora else "ORPO + LoRA"
+        else:
+            method = "QLoRA"
         return {
             "base_model": self.base_id,
             "adapter_path": str(self.adapter_path),
-            "method": "ORPO + DoRA" if self.use_dora else "ORPO + LoRA",
+            "method": method,
         }
 
 
-def get_engine(adapter_dir: str = "orpo_qwen_final") -> OrpoInferenceEngine:
-    global _engine
-    if _engine is None:
-        _engine = OrpoInferenceEngine(adapter_dir)
-    return _engine
+# Backward-compatible alias used by Project 2 scripts
+OrpoInferenceEngine = PeftInferenceEngine
+
+
+def get_engine(adapter_dir: str = "orpo_qwen_final") -> PeftInferenceEngine:
+    if adapter_dir not in _engines:
+        _engines[adapter_dir] = PeftInferenceEngine(adapter_dir)
+    return _engines[adapter_dir]
