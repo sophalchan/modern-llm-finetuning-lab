@@ -5,6 +5,7 @@ __pycache__/
 .env
 outputs/
 lora_model_llama3/
+lora_model_qwen/
 orpo_qwen_final/
 merged_model/
 *.gguf

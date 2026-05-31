@@ -39,8 +39,10 @@ def main():
     print(f"HF_TOKEN set: {'yes' if token else 'no (needed for some gated models)'}")
 
     print("\nRecommended hardware:")
-    print("  Project 1 (Llama-3.1-8B + Unsloth QLoRA): 16–24 GB VRAM")
-    print("  Project 2 (Qwen2.5-7B + ORPO/DoRA):       16–24 GB VRAM")
+    print("  Project 1 QLoRA (Qwen 1.5B, train_qwen_qlora.py):  8 GB VRAM OK")
+    print("  Project 1 Unsloth (Llama 8B):                       16–24 GB VRAM")
+    print("  Project 2 ORPO/DoRA (Qwen 1.5B low_vram):           8 GB VRAM OK")
+    print("  Project 2 ORPO/DoRA (Qwen 7B):                      16–24 GB VRAM")
 
 
 if __name__ == "__main__":
