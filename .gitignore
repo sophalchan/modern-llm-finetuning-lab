@@ -1,0 +1,13 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+outputs/
+lora_model_llama3/
+orpo_qwen_final/
+merged_model/
+*.gguf
+wandb/
+.cache/
+models/

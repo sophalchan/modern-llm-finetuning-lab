@@ -1,0 +1,3 @@
+# Install AFTER requirements-base.txt on Linux + CUDA machine:
+# pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+# pip install --no-deps trl peft loralib sentencepiece
