@@ -5,9 +5,24 @@ Two **local GPU projects** for efficient fine-tuning on consumer hardware (16–
 | Project | Model | Method | Goal |
 |---------|-------|--------|------|
 | **1 — Speed Run** | Llama-3.1-8B-Instruct | **QLoRA + Unsloth** | Fast domain / format adaptation |
-| **2 — Preference Align** | Qwen2.5-7B-Instruct | **ORPO + DoRA** | Single-step style & preference tuning |
+| **2 — Preference Align** | Qwen2.5-1.5B/7B-Instruct | **ORPO + DoRA** | Single-step style & preference tuning |
 
-## Four techniques covered
+## Web UI (test your model)
+
+After training Project 2:
+
+```bash
+source .venv/bin/activate
+pip install gradio
+python app_ui.py
+```
+
+Open **http://localhost:7860** in your browser — chat with your ORPO/DoRA fine-tuned model.
+
+## Hardware requirements
+
+- **Linux + NVIDIA GPU** — **8 GB VRAM** works for Project 2 with `project2_low_vram.yaml` (1.5B model)  
+- **16 GB+ VRAM** recommended for Project 1 (Llama 8B) and Qwen 7B  
 
 1. **QLoRA** — 4-bit base model + LoRA adapters (low VRAM)  
 2. **Unsloth** — optimized kernels (2–5× faster training)  
@@ -47,8 +62,9 @@ python project1_unsloth_qlora/export_gguf.py   # Ollama / LM Studio
 ### Project 2 — Qwen + ORPO + DoRA
 
 ```bash
-python project2_orpo_dora/train_qwen_orpo.py
+python project2_orpo_dora/train_qwen_orpo.py --config project2_low_vram.yaml
 python project2_orpo_dora/infer_qwen_orpo.py --prompt "Give a safe incident response summary."
+python app_ui.py   # Web UI → http://localhost:7860
 python project2_orpo_dora/train_qwen_orpo.py --no-dora   # standard LoRA only
 ```
 
@@ -57,9 +73,9 @@ python project2_orpo_dora/train_qwen_orpo.py --no-dora   # standard LoRA only
 ```
 configs/                    YAML hyperparameters
 project1_unsloth_qlora/     Llama-3.1 + Unsloth QLoRA train/infer/export
-project2_orpo_dora/         Qwen2.5 + ORPO/DoRA train/infer
-data/sample_domain_instructions.jsonl
-scripts/check_environment.py
+project2_orpo_dora/         Qwen + ORPO/DoRA train/infer
+app_ui.py                   Gradio web chat UI (port 7860)
+src/inference_engine.py     Shared model loader for CLI + UI
 ```
 
 **Author:** Sophal Chan · [Portfolio](https://sophalchan.github.io/)

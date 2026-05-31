@@ -48,6 +48,7 @@ def train(config_name: str = "project2_orpo_dora.yaml") -> None:
         token=token,
     )
     model = prepare_model_for_kbit_training(model)
+    model.gradient_checkpointing_enable()
 
     peft_config = LoraConfig(
         r=cfg["lora_r"],
@@ -77,7 +78,7 @@ def train(config_name: str = "project2_orpo_dora.yaml") -> None:
     dataset = dataset.train_test_split(test_size=cfg.get("test_size", 0.1))
 
     ocfg = cfg["orpo"]
-    orpo_config = ORPOConfig(
+    orpo_kwargs = dict(
         output_dir=str(ROOT / "outputs" / "project2"),
         learning_rate=ocfg["learning_rate"],
         per_device_train_batch_size=ocfg["per_device_train_batch_size"],
@@ -91,6 +92,9 @@ def train(config_name: str = "project2_orpo_dora.yaml") -> None:
         bf16=True,
         remove_unused_columns=False,
     )
+    if ocfg.get("max_steps"):
+        orpo_kwargs["max_steps"] = ocfg["max_steps"]
+    orpo_config = ORPOConfig(**orpo_kwargs)
 
     trainer_kwargs = dict(
         model=model,

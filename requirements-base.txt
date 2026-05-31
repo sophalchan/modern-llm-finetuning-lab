@@ -10,3 +10,4 @@ python-dotenv>=1.0.0
 rich>=13.0.0
 sentencepiece>=0.2.0
 protobuf>=4.0.0
+gradio>=4.44.0
